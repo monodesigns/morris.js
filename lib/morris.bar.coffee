@@ -152,7 +152,7 @@ class Morris.Bar extends Morris.Grid
     zeroPos = if @ymin <= 0 and @ymax >= 0 then @transY(0) else null
     @bars = for row, idx in @data
       @seriesBars[idx] = []
-      lastTop = 0
+      lastBottom = lastTop = 0
       for ypos, sidx in row._y
         if not @hasToShow(sidx)
           continue
@@ -174,8 +174,16 @@ class Morris.Bar extends Morris.Grid
             else
               @drawBar(@yStart, @xStart + idx * groupWidth, @ySize, groupWidth, @options.verticalGridColor, @options.verticalGridOpacity, @options.barRadius)
 
+          if @options.stacked
+            if not @options.horizontal
+              if lastBottom == zeroPos
+                top -= lastTop
+            else
+              top -= lastTop
+              if lastBottom == zeroPos
+                top = zeroPos
+            lastBottom = bottom
 
-          top -= lastTop if @options.stacked
           if not @options.horizontal
             lastTop += size
             @seriesBars[idx][sidx] = @drawBar(left, top, barWidth, size, @colorFor(row, sidx, 'bar'),
@@ -316,4 +324,3 @@ class Morris.Bar extends Morris.Grid
       "L", x + w - r[1], y, "Q", x + w, y, x + w, y + r[1],
       "L", x + w, y + h - r[2], "Q", x + w, y + h, x + w - r[2], y + h,
       "L", x + r[3], y + h, "Q", x, y + h, x, y + h - r[3], "Z" ]
-
